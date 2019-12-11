@@ -100,22 +100,26 @@ def get_pg_conn(db_host, db, db_user, db_pwd, schema_name, db_port=5439, query_g
 	if debug:
 		comment('Connect %s:%s:%s:%s' % (db_host, db_port, db, db_user))
 		
-	try:
-		conn = psycopg2.connect(user=db_user, host=db_host, port=int(db_port), dbname=db, password=db_pwd, sslmode='require')
-		print("Connected Database: ", db)
-		print("Schema Name: ", schema_name)
-		print("Data base user is: ", db_user)
-		#print("The password entered is: ", db_pwd)
-		#print("pwd:encoded: ", encrypted_pwd)
-		#conn.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-		conn.autocommit = True
-	except Exception as e:
-		
-		print("Exception on Connect to Cluster: %s" % e)
-		print('Unable to connect to Cluster Endpoint')
-		#cleanup(conn)
-		#raise e
-		return conn
+	if db_pwd is not None:
+		try:
+			conn = psycopg2.connect(user=db_user, host=db_host, port=int(db_port), dbname=db, password=db_pwd, sslmode='require')
+			print("Connected Database: ", db)
+			print("Schema Name: ", schema_name)
+			print("Data base user is: ", db_user)
+			#print("The password entered is: ", db_pwd)
+			#print("pwd:encoded: ", encrypted_pwd)
+			#conn.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+			conn.autocommit = True
+		except Exception as e:
+
+			print("Exception on Connect to Cluster: %s" % e)
+			print('Unable to connect to Cluster Endpoint')
+			#cleanup(conn)
+			#raise e
+			return conn
+	else:
+		process = subprocess.Popen(['sh', '/home/s5uvmm/admin/test'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		stdout, stderr = process.communicate(db_pwd[0])
 
 	# set search paths
 	aws_utils.set_search_paths(conn, schema_name, exclude_external_schemas=True)
